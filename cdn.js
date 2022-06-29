@@ -25,8 +25,13 @@ export class CDN {
 class cdn_request {
     constructor(cdn, request) {
 
+        let url = new URL(request.url);
+        url.search = '';
+        url = url.toString();
+        console.log(url)
+
         const pattern = new URLPattern('http://*:*/:user/:repo:tag(@[^/]*)?/:file(.*)');
-        const match = pattern.exec(request.url);
+        const match = pattern.exec(url);
         //if (!match) return new Response('not found (patter not match)', { status: 404 });
         let {user, repo, tag, file} = match.pathname.groups;
         // tag corrections
@@ -91,21 +96,20 @@ async function serveRepos(cdn, user) {
     headers.append('Authorization', 'Basic ' + btoa(gitUser + ":" + gitToken));
     let html = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+user+' github repos</title><body>';
 
-    // const repos = await fetch(url, {method:'GET', headers}).then(res => res.json());
+    const repos = await fetch(url, {method:'GET', headers}).then(res => res.json());
 
-    // html += '<h1> Organisation: '+user+'</h1>';
-    // html += '<ul>';
-    // for (const repo of repos) {
-    //     html += '<li><a href="./'+user+'/'+repo.name+'">'+repo.name+'</a></li>';
-    // }
-    // html += '</ul>';
+    html += '<h1> Organisation: '+user+'</h1>';
+    html += '<ul>';
+    for (const repo of repos) {
+        html += '<li><a href="./'+user+'/'+repo.name+'">'+repo.name+'</a></li>';
+    }
+    html += '</ul>';
 
 
-    //import {dump} from 'https://cdn.jsdelivr.net/gh/nuxodin/dump.js@1.2.1/mod.min.js';
-    //document.body.innerHTML = dump(String, {depth:3, order:0, inherited:true});
-    // same as dynamic import:
-    const {dump} = await import('https://cdn.jsdelivr.net/gh/nuxodin/dump.js@1.2.1/mod.min.js');
-    html += dump(Deno, {depth:3, order:0, inherited:true});
 
     return new Response(html, { status:200, headers: { 'Content-Type': 'text/html' } });
 }
+
+
+//const {dump} = await import('https://cdn.jsdelivr.net/gh/nuxodin/dump.js@1.2.1/mod.min.js');
+//html += dump(Deno, {depth:3, order:0, inherited:true});
