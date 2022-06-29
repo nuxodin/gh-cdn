@@ -12,4 +12,4 @@ const cdn = new CDN({
 });
 
 
-await serve(request=>cdn.handle(request), {port:8081});
+await serve(request=>cdn.handle(request), {port:80});
