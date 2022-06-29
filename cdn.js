@@ -70,7 +70,14 @@ class cdn_request {
         const cType = typeByExtension(extension);
         const text = await Deno.readTextFile(this.localFile);
         const response = new Response(text, { status: 200 });
+
+
+        // security
+        // https://github.com/jsdelivr/jsdelivr/issues/18027#issuecomment-1170052883
+        // todo: add csp headers and Feature-Policy-headers?
         response.headers.set('content-type', cType);
+
+
         this.immutable && response.headers.set('cache-control', 'immutable');
         return response;
     }
