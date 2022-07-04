@@ -43,6 +43,8 @@ class cdn_request {
 
         this.ghUrlPathname = `/${user}/${repo}/${tag}/${file}`;
         this.localFile = cdn.options.cachePath + this.ghUrlPathname;
+
+        this.tag = tag;
     }
     async serve(){
         try {
@@ -50,6 +52,7 @@ class cdn_request {
             if (stat.isDirectory) {
                 return new Response('todo: server directory', { status: 404 });
             } else {
+				if (this.tag === 'main') this.getOriginal(); // get original in background if main
                 return this.serveFile();
             }
         } catch (error) {
