@@ -74,12 +74,13 @@ class cdn_request {
         const text = await Deno.readTextFile(this.localFile);
         const response = new Response(text, { status: 200 });
 
-
         // security
         // https://github.com/jsdelivr/jsdelivr/issues/18027#issuecomment-1170052883
         // todo: add csp headers and Feature-Policy-headers?
         response.headers.set('content-type', cType);
-
+        response.headers.set('access-control-allow-origin', '*');
+        response.headers.set('access-control-expose-headers', '*');
+        //response.headers.set('cross-origin-resource-policy', 'cross-origin'); // needed?
 
         this.immutable && response.headers.set('cache-control', 'immutable');
         return response;
