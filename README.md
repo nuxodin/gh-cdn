@@ -1,2 +1,2 @@
 # gh-cdn
-a cdn for github something like jsdelivr
+A CDN for github, something like jsdelivr 
