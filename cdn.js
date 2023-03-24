@@ -116,8 +116,6 @@ async function serveRepos(cdn, user) {
     }
     html += '</ul>';
 
-
-
     return new Response(html, { status:200, headers: { 'Content-Type': 'text/html' } });
 }
 
