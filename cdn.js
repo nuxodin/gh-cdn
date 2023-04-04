@@ -7,18 +7,15 @@ export class CDN {
         this.options = options;
     }
     async handle(request) {
-
         let url = new URL(request.url);
-
         if (url.pathname === '/favicon.ico') return new Response('not found', { status: 404 });
-
         url.search = '';
         url = url.toString();
 
         const pattern = new URLPattern('http://*:*/:user?/:repo?:tag(@[^/]*)?/:file(.*)?');
         const match = pattern.exec(url);
         const groups = match.pathname.groups;
-        let {user,repo,tag,file} = groups;
+        const {user,repo,_tag,file} = groups;
 
         let Klass = File;
         if (file === '') Klass = Repo;
@@ -51,7 +48,7 @@ class CDNRequest {
     constructor(cdn, groups, request) {
         this.cdn = cdn;
         this.request = request;
-        this.maxAge = 60*60*1000; // 1 hour
+        this.maxAge = 30*60*1000; // 30 minutes
     }
     async serve(){
         try {
@@ -95,6 +92,8 @@ class CDNRequest {
         return this.cdn.options.cachePath + this.pathname;
     }
 }
+
+
 class File extends CDNRequest {
     constructor(cdn, groups, request) {
         super(cdn, groups, request);
@@ -135,7 +134,6 @@ class User extends CDNRequest {
         this.pathname = `/${this.user}/__index.json`;
     }
     fetch(){
-        //return this.cdn.githubApi(`orgs/${this.user}/repos?per_page=200`);
         return this.cdn.githubApi(`orgs/${this.user}/repos?per_page=200`).then(response => {
             if (response.status === 404) {
                 return this.cdn.githubApi(`users/${this.user}/repos?per_page=200`);
@@ -144,8 +142,6 @@ class User extends CDNRequest {
             }
         });
     }
-
-
     async response(){
         const url = new URL(this.request.url);
 
