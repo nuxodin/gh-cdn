@@ -253,7 +253,7 @@ const htmlHead = `
         <meta charset=utf-8>
         <meta name=viewport content=width=device-width>
         <title>CDN</title>
-        <script type=module src="/u1ui/u1/auto.js"></script>
+        <script type=module src="/u1ui/u1@latest/auto.js"></script>
         <link rel=stylesheet href="/u1ui/classless.css/simple.css">
         <style>body { display:block }</style>
 <body>
