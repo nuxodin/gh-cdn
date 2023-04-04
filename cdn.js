@@ -84,11 +84,11 @@ class CDNRequest {
         } else if (response.status === 404) {
             await this.notFound();
         } else {
-            const body = await response.text();
+            //const body = await response.text();
             throw new Error('fail status: '+response.status+' ('+response.url+')');
         }
     }
-    async response(){
+    response(){
         return fileToResponse(this.localFile);
     }
     get localFile(){
@@ -135,9 +135,17 @@ class User extends CDNRequest {
         this.pathname = `/${this.user}/__index.json`;
     }
     fetch(){
-        return this.cdn.githubApi(`orgs/${this.user}/repos?per_page=200`);
-        //this.user+'/repos?per_page=200');
+        //return this.cdn.githubApi(`orgs/${this.user}/repos?per_page=200`);
+        return this.cdn.githubApi(`orgs/${this.user}/repos?per_page=200`).then(response => {
+            if (response.status === 404) {
+                return this.cdn.githubApi(`users/${this.user}/repos?per_page=200`);
+            } else {
+                return response;
+            }
+        });
     }
+
+
     async response(){
         const url = new URL(this.request.url);
 
@@ -154,15 +162,16 @@ class User extends CDNRequest {
                         <th>Repo
                         <th>Description
                         <th>Stars
-                        <th>Updated
+                        <th>Last change
                 <tbody>`;
 
             for (const repo of obj) {
                 html += '<tr u1-href="./'+repo.name+'/?html">';
-                html +=      '<td><a href="./'+repo.name+'/?html">'+repo.name+'</a>';
-                html +=      '<td><small>'+repo.description+'</small>';
+                html +=      '<td style="white-space:nowrap"><a href="./'+repo.name+'/?html">'+repo.name+'</a>';
+                html +=      '<td><small>'+(repo.description??'')+'</small>';
                 html +=      '<td>'+repo.stargazers_count;
-                html +=      '<td data-sortby='+ new Date(repo.updated_at).getTime() +'><u1-time datetime="'+repo.updated_at+'" type=relative></u1-time>';
+                html +=      '<td data-sortby='+ new Date(repo.pushed_at).getTime() +' style="white-space:nowrap">'+
+                                    '<u1-time datetime="'+repo.pushed_at+'" type=relative></u1-time>';
 
             }
             html += '</table>';
@@ -253,9 +262,9 @@ const htmlHead = `
         <meta charset=utf-8>
         <meta name=viewport content=width=device-width>
         <title>CDN</title>
-        <script type=module src="/u1ui/u1@latest/auto.js"></script>
+        <script type=module src="/u1ui/u1/auto.js"></script>
         <link rel=stylesheet href="/u1ui/classless.css/simple.css">
-        <style>body { display:block }</style>
+        <style>body { display:block; --width:60rem; }</style>
 <body>
 `;
 
