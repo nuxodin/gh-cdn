@@ -35,7 +35,7 @@ export class CDN {
 
         return response;
     }
-    async githubApi(path) {
+    githubApi(path) {
         const {gitUser,gitToken} = this.options;
         const url = 'https://api.github.com/'+path;
         const headers = new Headers();
