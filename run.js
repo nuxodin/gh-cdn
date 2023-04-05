@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.145.0/http/server.ts";
 import { CDN } from "./cdn.js";
 
@@ -12,4 +11,6 @@ const cdn = new CDN({
 });
 
 
-await serve(request=>cdn.handle(request), {port:81});
+const port = Deno.args[2] || 80;
+
+await serve(request=>cdn.handle(request), {port});
