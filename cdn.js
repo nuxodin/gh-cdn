@@ -268,8 +268,9 @@ const htmlHead = `
 async function fileToResponse(path){
     const extension = extname(path);
     const cType = typeByExtension(extension);
-    const text = await Deno.readTextFile(path);
-    const response = new Response(text, { status: 200 });
+    //const data = await Deno.readTextFile(path); // zzz
+    const data = await Deno.readFile(path);
+    const response = new Response(data, { status: 200 });
     response.headers.set('content-type', cType);
     return response;
 }
