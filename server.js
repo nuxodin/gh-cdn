@@ -7,7 +7,7 @@ const cdn = createCDN({ cachePath: "./cache" });
 app.route("/full", cdn.full); // Mount "full" CDN under /full/
 app.route("/min", cdn.min); // Mount "min" CDN under /min/
 
-const port = parseInt(Deno.env.get("PORT") || Deno.args[2]) || 8080;
+const port = parseInt(Deno.env.get("PORT")) || 8080;
 
 console.log(`Server running on http://localhost:${port}`);
 console.log(`- Full source: http://localhost:${port}/full/user/repo@tag/file.js`);
