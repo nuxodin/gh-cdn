@@ -11,7 +11,7 @@ export async function tryCompress(inputPath, outputPath) {
     const terser = await import("terser");
     const result = await terser.minify(contents, { module: true, ecma: 2016 });
     compressed = result.code;
-  } else if (ext === "css") {
+  } else if (ext === "disabled-css") {
     const { minify } = await import("csso");
     compressed = minify(contents).css;
   } else if (ext === "html") {

@@ -2,12 +2,12 @@ const htmlHead = `<!DOCTYPE html>
 <html lang=en>
     <head>
         <meta charset=utf-8>
-        <meta name=viewport content=width=device-width>
+        <meta name=viewport content="width=device-width">
         <title>CDN</title>
         <script type=module async src="https://cdn.jsdelivr.net/gh/u2ui/u2@main/u2/auto.js"></script>
         <link rel=stylesheet href="https://cdn.jsdelivr.net/gh/u2ui/u2@main/css/classless/simple.css">
         <style>
-            html { --color:#a1f; font-size:14px; }
+            html { --color:#a1f; font-size:15px; }
             body { display:block; --width:90rem; }
             table { white-space:nowrap }
         </style>
@@ -28,7 +28,7 @@ export function renderUser(user, repos) {
                 <thead>
                     <tr><th>Repo<th>Description<th>Stars<th>Last change
                 <tbody>${repos.map(r => row(
-                    `<a href="./${user}/${r.name}?html" style="white-space:nowrap">${escape(r.name)}</a>`,
+                    `<a href="./${r.name}/?html" style="white-space:nowrap">${escape(r.name)}</a>`,
                     `<small style="display:block; text-overflow:ellipsis; overflow:hidden; max-width:50rem">${r.description ? escape(r.description) : ''}</small>`,
                     r.stargazers_count,
                     `<u2-time datetime="${r.pushed_at}" type=relative></u2-time>`
@@ -45,7 +45,7 @@ export function renderRepo(user, repo, releases) {
             <tr><th>Tag<th>Published
         <tbody>
             ${releases.map(r => row(
-                `<a href="./${user}/${repo}/${r.tag_name}?html">${escape(r.tag_name)}</a>`,
+                `<a href="../${repo}@${r.tag_name}/?html">${escape(r.tag_name)}</a>`,
                 `<u1-time datetime="${r.published_at}" type=relative>${r.published_at}</u1-time>`
             )).join('')}
             </table>
@@ -61,4 +61,23 @@ export function renderRoot(orgs) {
                 ${orgs.map(org => row(`<a href="./${org}?html">${escape(org)}</a>`)).join('')}
             </table>
         </u2-table>`;
+}
+
+export function renderDir(pathname, entries) {
+
+    const breadcrumb = (pathname) =>
+        pathname.split("/").filter(Boolean).map((part, i, parts) => {
+            const href = "../".repeat(parts.length - i - 1) || "./";
+            return `<a href="${href}?html">${escape(part)}</a>`;
+        }).join(" / ");
+
+    return htmlHead + html`
+      <h1>${breadcrumb(pathname)}</h1>
+      <u2-table><table>
+        <thead><tr><th>Name<th>Type
+        <tbody>${entries.map(name => row(
+            `<a href="${name}?html">${escape(name)}</a>`,
+            name.endsWith('/') ? 'dir' : 'file'
+        )).join('')}
+      </table></u2-table>`;
 }

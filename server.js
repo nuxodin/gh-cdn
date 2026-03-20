@@ -4,8 +4,8 @@ import { createCDN } from "./src/app.js";
 const app = new Hono();
 const cdn = createCDN({ cachePath: "./cache" });
 
-app.route("/full", cdn.full); // Mount "full" CDN under /full/
-app.route("/min", cdn.min); // Mount "min" CDN under /min/
+app.route("/full", cdn.full);
+app.route("/min", cdn.min);
 
 const port = parseInt(Deno.env.get("PORT")) || 8080;
 
