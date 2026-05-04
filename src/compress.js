@@ -15,7 +15,7 @@ export async function tryCompress(inputPath, outputPath) {
         //   compressed = minify(contents).css;
 
     } else if (ext === "css") {
-        const { transform } = await import("npm:lightningcss");
+        const { transform } = await import("lightningcss");
         const { code } = transform({
             filename: inputPath,
             code: new TextEncoder().encode(contents),
@@ -23,7 +23,7 @@ export async function tryCompress(inputPath, outputPath) {
         });
         compressed = new TextDecoder().decode(code);
     } else if (ext === "svg") {
-        const { optimize } = await import("npm:svgo");
+        const { optimize } = await import("svgo");
         compressed = optimize(contents, {
             path: inputPath,
             multipass: true,
@@ -54,7 +54,7 @@ export async function tryCompress(inputPath, outputPath) {
         throw new Error(`Unsupported type for compression: .${ext}`);
     }
 
-    const { ensureFile } = await import("std/fs/mod.ts");
+    const { ensureFile } = await import("@std/fs/ensure-file");
     await ensureFile(outputPath);
     await Deno.writeTextFile(outputPath, compressed);
 }

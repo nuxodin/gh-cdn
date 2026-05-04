@@ -1,16 +1,21 @@
 {
   "name": "@nuxodin/gh-cdn",
   "version": "0.6.1",
+  "license": "MIT",
   "exports": "./server.js",
   "tasks": {
     "start": "deno run --allow-net --allow-read --allow-write --allow-env --allow-import --allow-ffi server.js",
     "dev": "deno run --allow-net --allow-read --allow-write --allow-env --allow-import --allow-ffi --watch server.js"
   },
   "imports": {
-    "hono": "npm:hono",
-    "hono/cors": "npm:hono/cors",
-    "std/": "https://deno.land/std@0.145.0/",
-    "terser": "https://cdn.skypack.dev/terser@v5.16.8",
+    "hono": "npm:hono@^4",
+    "hono/cors": "npm:hono@^4/cors",
+    "@std/fs": "jsr:@std/fs@1",
+    "@std/path": "jsr:@std/path@1",
+    "@std/media-types": "jsr:@std/media-types@1",
+    "terser": "npm:terser@^5",
+    "lightningcss": "npm:lightningcss@^1",
+    "svgo": "npm:svgo@^4",
     "clean-css": "npm:clean-css@^5.3.3",
     "html-minifier-terser": "npm:html-minifier-terser@^7.2.0",
     "csso": "npm:csso@^5.0.5"

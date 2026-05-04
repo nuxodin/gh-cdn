@@ -1,7 +1,7 @@
-import { ensureFile } from "std/fs/mod.ts";
-import { extname } from "std/path/mod.ts";
+import { ensureFile } from "@std/fs/ensure-file";
+import { extname } from "@std/path/extname";
 import { tryCompress } from "./compress.js";
-import { typeByExtension } from "std/media_types/mod.ts";
+import { typeByExtension } from "@std/media-types";
 
 // --- Utilities ---
 
