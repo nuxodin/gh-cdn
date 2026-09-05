@@ -30,15 +30,24 @@ export async function cached(resource, opts, c) {
     catch (e) { throw new Error(`Upstream unreachable: ${e.message}`); }
     if (res.status === 404) return resource.onNotFound?.(fullPath) ?? writeEmptyJson(fullPath);
     if (res.status !== 200) throw new Error(`Fetch failed: ${res.status} (${res.url})`);
-    await ensureFile(fullPath);
-    await Deno.writeTextFile(fullPath, await res.text());
+    // The body first, then one atomic move: a reader sees the old file or the whole new one, never
+    // the empty one `ensureFile` used to leave behind while the download was still running. An
+    // immutable tag is cached forever, so a file written half is a file wrong forever.
+    const body = await res.text();
+    const part = `${fullPath}.${Math.random().toString(36).slice(2)}.part`;
+    await ensureFile(part);
+    await Deno.writeTextFile(part, body);
+    await Deno.rename(part, fullPath);
   }
 
   try {
     const stat = await Deno.stat(fullPath);
     if (stat.isDirectory) throw new Error("is directory");
     const age = Date.now() - stat.mtime;
-    if (age > resource.maxAge) await sync();
+    // An immutable tag is never fetched again, so a torso would be wrong forever. The tree states
+    // the size; where it does not, only emptiness gives the write away.
+    if (resource.size === undefined ? !stat.size : stat.size !== resource.size) await sync();
+    else if (age > resource.maxAge) await sync();
     else if (age > resource.maxAge / 2) sync().catch(console.error);
   } catch (e) {
     if (!(e instanceof Deno.errors.NotFound)) throw e;
@@ -46,10 +55,10 @@ export async function cached(resource, opts, c) {
   }
 
   if (!resource.meta && opts.serve === "min") {
-    try {
-      await Deno.stat(minPath);
-    }
-    catch {
+    const [source, min] = await Promise.all([Deno.stat(fullPath), Deno.stat(minPath).catch(() => null)]);
+    // Compress again when there is nothing usable: no file, an empty one a failed write left behind,
+    // or one older than the source it came from. Minifying costs cpu here and nothing upstream.
+    if (!min?.size || min.mtime < source.mtime) {
       try {
         await tryCompress(fullPath, minPath);
       }

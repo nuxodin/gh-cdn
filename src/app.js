@@ -11,12 +11,32 @@ const wantsHtml = (c) => c.req.query("html") !== undefined;
 const readJson = (path) => Deno.readTextFile(path).then(JSON.parse);
 
 
+// GitHub calls the tag `v1.5.16`; jsdelivr answers to `1.5.16` as well, and a url written for it has
+// to keep working when only the host changes. So a tag with no tree is tried once more with a `v` in
+// front, and what answered is remembered — the next request for that tag looks it up directly.
+const refs = new Map();
+
+async function tagTree({ user, repo, tag }, opts, c) {
+  const key = `${user}/${repo}@${tag}`;
+  const known = refs.get(key);
+  const tries = known ? [known] : tag.startsWith("v") ? [tag] : [tag, "v" + tag];
+  let failed;
+  for (const ref of tries) {
+    const resource = gh.tree({ user, repo, tag: ref });
+    try {
+      await cached(resource, opts, c);
+      refs.set(key, ref);
+      return { ref, resource };
+    } catch (e) { failed = e; }
+  }
+  throw failed;
+}
+
 export async function listDir(pathname, opts, c) {
   const [, user, repo, tag, ...subpath] = pathname.split("/");
   const prefix = subpath.join("/");
 
-  const treeResource = gh.tree({ user, repo, tag });
-  await cached(treeResource, opts, c);
+  const { resource: treeResource } = await tagTree({ user, repo, tag }, opts, c);
   const { tree } = await readJson(opts.cachePath + "/meta" + treeResource.pathname);
 
   const children = new Set();
@@ -36,14 +56,13 @@ export async function listDir(pathname, opts, c) {
 }
 
 export async function serveFileOrDir({ user, repo, tag, file }, opts, c) {
-  const treeResource = gh.tree({ user, repo, tag });
-  await cached(treeResource, opts, c);
+  const { ref, resource: treeResource } = await tagTree({ user, repo, tag }, opts, c);
   const { tree } = await readJson(opts.cachePath + "/meta" + treeResource.pathname);
 
   const normalizedFile = file.replace(/\/$/, "")
   const entry = tree.find(e => e.path === normalizedFile);
-  if (!entry || entry.type === "tree") return listDir(`/${user}/${repo}/${tag}/${normalizedFile}`, opts, c);
-  return cached(gh.file({ user, repo, tag, file: normalizedFile }), opts, c);
+  if (!entry || entry.type === "tree") return listDir(`/${user}/${repo}/${ref}/${normalizedFile}`, opts, c);
+  return cached(gh.file({ user, repo, tag: ref, file: normalizedFile, size: entry.size }), opts, c);
 }
 
 

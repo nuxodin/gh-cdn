@@ -54,7 +54,11 @@ export async function tryCompress(inputPath, outputPath) {
         throw new Error(`Unsupported type for compression: .${ext}`);
     }
 
+    // Written whole or not at all — the same reason the source cache does it: an empty file left
+    // behind by an interrupted write would be served as the answer.
     const { ensureFile } = await import("@std/fs/ensure-file");
-    await ensureFile(outputPath);
-    await Deno.writeTextFile(outputPath, compressed);
+    const part = `${outputPath}.${Math.random().toString(36).slice(2)}.part`;
+    await ensureFile(part);
+    await Deno.writeTextFile(part, compressed);
+    await Deno.rename(part, outputPath);
 }

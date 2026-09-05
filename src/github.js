@@ -14,10 +14,13 @@ const html = (body) => new Response(body, { headers: { "content-type": "text/htm
 const readJson = (path) => Deno.readTextFile(path).then(JSON.parse);
 
 
-export function file({ user, repo, tag, file }) {
+// `size` is what the tree says the blob is. A tag is cached forever, so a file that arrived short
+// would stay short forever — with the size known, the cache can tell a whole file from a torso.
+export function file({ user, repo, tag, file, size }) {
     const pathname = `/${user}/${repo}/${tag ?? "main"}/${file}`;
     return {
         pathname,
+        size,
         maxAge: tag ? Infinity : 2 * 60 * 1000,
         fetch: () => fetch("https://raw.githubusercontent.com" + pathname),
     };
