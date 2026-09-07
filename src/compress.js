@@ -1,3 +1,27 @@
+// Without targets lightningcss assumes everything is supported and drops fallback declarations
+// (e.g. max-inline-size:100% in front of :stretch). The floor is not a support promise, it is the
+// point where lightningcss stops adding weight: raising it to today's browsers saves 0.5%, lowering
+// it past nesting support (chrome 120 / safari 17.2 / firefox 117) costs 6-10%. Firefox is at 117
+// for that reason alone - every higher value produces identical bytes.
+//
+// How this was measured (2026-09, redo when it feels stale):
+//   usage share:  deno run -A npm:browserslist ">0.2% and not dead"
+//                 browserslist.coverage(browserslist("chrome >= 120, safari >= 17.2, ..."))  -> ~91%
+//   real cost:    minify ~100 stylesheets from /var/www/workplace/u2 with candidate target sets and
+//                 compare total output length; diff one file unminified to see what a floor changes.
+// Do not set `android` - that is caniuse's legacy Android Browser stream, not Chrome for Android,
+// and it silently de-sugars nesting. Android Chrome is covered by `chrome`.
+const version = (major, minor = 0) => (major << 16) | (minor << 8);
+const cssTargets = {
+    chrome: version(120),
+    edge: version(120),
+    firefox: version(117),
+    safari: version(17, 2),
+    ios_saf: version(17, 2),
+    samsung: version(25),
+    opera: version(106),
+};
+
 /**
  * Reads a source file, minifies it based on extension, and writes to outputPath.
  */
@@ -20,6 +44,7 @@ export async function tryCompress(inputPath, outputPath) {
             filename: inputPath,
             code: new TextEncoder().encode(contents),
             minify: true,
+            targets: cssTargets,
         });
         compressed = new TextDecoder().decode(code);
     } else if (ext === "svg") {
