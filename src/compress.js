@@ -39,12 +39,16 @@ export async function tryCompress(inputPath, outputPath) {
         //   compressed = minify(contents).css;
 
     } else if (ext === "css") {
-        const { transform } = await import("lightningcss");
+        const { transform, Features } = await import("lightningcss");
         const { code } = transform({
             filename: inputPath,
             code: new TextEncoder().encode(contents),
             minify: true,
             targets: cssTargets,
+            // light-dark() must survive: its de-sugaring reads prefers-color-scheme in a media query
+            // and therefore ignores an author's `color-scheme`, which silently breaks every page that
+            // pins itself to one scheme. Keeping it is also 0.5% smaller.
+            exclude: Features.LightDark,
         });
         compressed = new TextDecoder().decode(code);
     } else if (ext === "svg") {
