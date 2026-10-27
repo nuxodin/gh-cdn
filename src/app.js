@@ -94,6 +94,13 @@ export function createCDN(options = {}) {
 
     const app = new Hono();
 
+    // Path segments become cache paths: `..`, `.` or a backslash (also percent-encoded) would leave the cache.
+    app.use("*", async (c, next) => {
+      let segments;
+      try { segments = decodeURIComponent(new URL(c.req.url).pathname).split("/"); } catch { segments = [".."]; }
+      if (segments.some((s) => s === ".." || s === "." || s.includes("\\"))) return c.text("Bad path", 400);
+      await next();
+    });
     app.use("*", cors());
     app.use("*", async (c, next) => {
       await next();

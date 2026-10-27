@@ -33,10 +33,10 @@ export async function cached(resource, opts, c) {
     // The body first, then one atomic move: a reader sees the old file or the whole new one, never
     // the empty one `ensureFile` used to leave behind while the download was still running. An
     // immutable tag is cached forever, so a file written half is a file wrong forever.
-    const body = await res.text();
+    const body = new Uint8Array(await res.arrayBuffer()); // bytes: text() would break images and fonts
     const part = `${fullPath}.${Math.random().toString(36).slice(2)}.part`;
     await ensureFile(part);
-    await Deno.writeTextFile(part, body);
+    await Deno.writeFile(part, body);
     await Deno.rename(part, fullPath);
   }
 
