@@ -1,11 +1,6 @@
 {
   "version": "5",
   "specifiers": {
-    "jsr:@std/fs@1": "1.0.24",
-    "jsr:@std/internal@^1.0.14": "1.0.14",
-    "jsr:@std/media-types@1": "1.1.0",
-    "jsr:@std/path@1": "1.1.6",
-    "jsr:@std/path@^1.1.5": "1.1.6",
     "npm:clean-css@^5.3.3": "5.3.3",
     "npm:csso@^5.0.5": "5.0.5",
     "npm:hono@4": "4.13.5",
@@ -15,26 +10,6 @@
     "npm:svgo@*": "4.0.1",
     "npm:svgo@4": "4.0.1",
     "npm:terser@5": "5.46.1"
-  },
-  "jsr": {
-    "@std/fs@1.0.24": {
-      "integrity": "f3061b45b81673a2bece689da041df32d174be064c89eb6397fb5718d3fb7877",
-      "dependencies": [
-        "jsr:@std/path@^1.1.5"
-      ]
-    },
-    "@std/internal@1.0.14": {
-      "integrity": "291516b3d4c35024d6ffbc0a9df5bf4c64116e05b50012cf846710152d2ffdf7"
-    },
-    "@std/media-types@1.1.0": {
-      "integrity": "c9d093f0c05c3512932b330e3cc1fe1d627b301db33a4c2c2185c02471d6eaa4"
-    },
-    "@std/path@1.1.6": {
-      "integrity": "c68485c2a4dfbb5ae3cc74fae4e8c4e5d874cf8a8ed12927917235c758b46cbe",
-      "dependencies": [
-        "jsr:@std/internal"
-      ]
-    }
   },
   "npm": {
     "@jridgewell/gen-mapping@0.3.13": {
@@ -380,9 +355,6 @@
   },
   "workspace": {
     "dependencies": [
-      "jsr:@std/fs@1",
-      "jsr:@std/media-types@1",
-      "jsr:@std/path@1",
       "npm:clean-css@^5.3.3",
       "npm:csso@^5.0.5",
       "npm:hono@4",
@@ -390,6 +362,15 @@
       "npm:lightningcss@1",
       "npm:svgo@4",
       "npm:terser@5"
-    ]
+    ],
+    "packageJson": {
+      "dependencies": [
+        "npm:hono@4",
+        "npm:html-minifier-terser@^7.2.0",
+        "npm:lightningcss@1",
+        "npm:svgo@4",
+        "npm:terser@5"
+      ]
+    }
   }
 }

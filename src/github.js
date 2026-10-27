@@ -1,8 +1,9 @@
+import { readdir, readFile } from "node:fs/promises";
+import process from "node:process";
 import { renderRepo, renderRoot, renderUser } from "./views.js";
 
 
-const USER = Deno.env.get("GITHUB_USER");
-const TOKEN = Deno.env.get("GITHUB_TOKEN");
+const { GITHUB_USER: USER, GITHUB_TOKEN: TOKEN } = process.env;
 const headers = new Headers();
 if (USER && TOKEN) headers.set("Authorization", "Basic " + btoa(USER + ":" + TOKEN));
 
@@ -11,7 +12,7 @@ const get = (path) => fetch("https://api.github.com/" + path, { headers });
 // bad: also in app.js
 const wantsHtml = (c) => c.req.query("html") !== undefined;
 const html = (body) => new Response(body, { headers: { "content-type": "text/html" } });
-const readJson = (path) => Deno.readTextFile(path).then(JSON.parse);
+const readJson = (path) => readFile(path, "utf8").then(JSON.parse);
 
 
 // `size` is what the tree says the blob is. A tag is cached forever, so a file that arrived short
@@ -69,11 +70,11 @@ export function root(_, opts, c) {
         fetch: () => Promise.resolve(new Response("[]")),
         respond: async () => {
             if (!wantsHtml(c)) {
-                try { return new Response(await Deno.readTextFile(opts.cachePath + "/../README.md"), { headers: { "content-type": "text/plain" } }); }
+                try { return new Response(await readFile(opts.cachePath + "/../README.md", "utf8"), { headers: { "content-type": "text/plain" } }); }
                 catch { return new Response("# gh-cdn\nA CDN for GitHub\n\nAdd ?html for interactive view", { headers: { "content-type": "text/plain" } }); }
             }
             const orgs = [];
-            try { for await (const e of Deno.readDir(opts.cachePath + "/full")) if (e.isDirectory) orgs.push(e.name); } catch { }
+            try { for (const e of await readdir(opts.cachePath + "/full", { withFileTypes: true })) if (e.isDirectory()) orgs.push(e.name); } catch { }
             return html(renderRoot(orgs));
         },
     };

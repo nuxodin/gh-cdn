@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 
@@ -8,7 +9,7 @@ import * as gh from "./github.js";
 
 const html = (body) => new Response(body, { headers: { "content-type": "text/html" } });
 const wantsHtml = (c) => c.req.query("html") !== undefined;
-const readJson = (path) => Deno.readTextFile(path).then(JSON.parse);
+const readJson = (path) => readFile(path, "utf8").then(JSON.parse);
 
 
 // GitHub calls the tag `v1.5.16`; jsdelivr answers to `1.5.16` as well, and a url written for it has
@@ -94,13 +95,6 @@ export function createCDN(options = {}) {
 
     const app = new Hono();
 
-    // Path segments become cache paths: `..`, `.` or a backslash (also percent-encoded) would leave the cache.
-    app.use("*", async (c, next) => {
-      let segments;
-      try { segments = decodeURIComponent(new URL(c.req.url).pathname).split("/"); } catch { segments = [".."]; }
-      if (segments.some((s) => s === ".." || s === "." || s.includes("\\"))) return c.text("Bad path", 400);
-      await next();
-    });
     app.use("*", cors());
     app.use("*", async (c, next) => {
       await next();

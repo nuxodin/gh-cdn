@@ -1,3 +1,6 @@
+import { readFile } from "node:fs/promises";
+import { writeAtomic } from "./cache.js";
+
 // Without targets lightningcss assumes everything is supported and drops fallback declarations
 // (e.g. max-inline-size:100% in front of :stretch). The floor is not a support promise, it is the
 // point where lightningcss stops adding weight: raising it to today's browsers saves 0.5%, lowering
@@ -27,7 +30,7 @@ const cssTargets = {
  */
 export async function tryCompress(inputPath, outputPath) {
     const ext = inputPath.match(/\.(\w+)$/)?.[1];
-    const contents = await Deno.readTextFile(inputPath);
+    const contents = await readFile(inputPath, "utf8");
 
     let compressed;
     if (ext === "js") {
@@ -83,11 +86,6 @@ export async function tryCompress(inputPath, outputPath) {
         throw new Error(`Unsupported type for compression: .${ext}`);
     }
 
-    // Written whole or not at all — the same reason the source cache does it: an empty file left
-    // behind by an interrupted write would be served as the answer.
-    const { ensureFile } = await import("@std/fs/ensure-file");
-    const part = `${outputPath}.${Math.random().toString(36).slice(2)}.part`;
-    await ensureFile(part);
-    await Deno.writeTextFile(part, compressed);
-    await Deno.rename(part, outputPath);
+    // Written whole or not at all: an empty file left by an interrupted write would be served.
+    await writeAtomic(outputPath, compressed);
 }

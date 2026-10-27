@@ -1,0 +1,15 @@
+{
+  "name": "@nuxodin/gh-cdn",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "bun server.js"
+  },
+  "dependencies": {
+    "hono": "^4",
+    "terser": "^5",
+    "lightningcss": "^1",
+    "svgo": "^4",
+    "html-minifier-terser": "^7.2.0"
+  }
+}

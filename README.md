@@ -1,6 +1,6 @@
 # gh-cdn
 
-A modern, fast, and feature-rich GitHub CDN built with [Deno](https://deno.land/) and [Hono](https://hono.dev/).
+A modern, fast, and feature-rich GitHub CDN built with [Hono](https://hono.dev/), running on [Deno](https://deno.land/) or [Bun](https://bun.sh/).
 
 It allows you to serve files directly from GitHub with automatic on-the-fly minification, smart caching, and a clean web interface.
 
@@ -17,7 +17,7 @@ It allows you to serve files directly from GitHub with automatic on-the-fly mini
 
 ## 🛠 Installation
 
-Ensuring you have [Deno](https://deno.com/manual/getting_started/installation) installed.
+Requires [Deno](https://deno.com/) or [Bun](https://bun.sh/).
 
 ```bash
 git clone <your-repo-url>
@@ -28,7 +28,8 @@ cd gh-cdn
 
 ### Start the server
 ```bash
-deno task start
+deno task start          # Deno
+bun install && bun start # Bun
 ```
 By default, the server runs on port `8080`.
 

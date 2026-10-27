@@ -1,7 +1,8 @@
 {
   "name": "@nuxodin/gh-cdn",
-  "version": "0.6.6",
+  "version": "0.6.7",
   "license": "MIT",
+  "nodeModulesDir": "none",
   "exports": "./server.js",
   "tasks": {
     "start": "deno run --allow-net --allow-read --allow-write --allow-env --allow-import --allow-ffi server.js",
@@ -10,9 +11,7 @@
   "imports": {
     "hono": "npm:hono@^4",
     "hono/cors": "npm:hono@^4/cors",
-    "@std/fs": "jsr:@std/fs@1",
-    "@std/path": "jsr:@std/path@1",
-    "@std/media-types": "jsr:@std/media-types@1",
+    "hono/utils/mime": "npm:hono@^4/utils/mime",
     "terser": "npm:terser@^5",
     "lightningcss": "npm:lightningcss@^1",
     "svgo": "npm:svgo@^4",
