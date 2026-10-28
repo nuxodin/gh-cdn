@@ -1,6 +1,6 @@
 import { mkdir, readFile, rename, stat as fileStat, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
-import { getMimeType } from "hono/utils/mime";
+import { getMimeType, mimes as honoMimes } from "hono/utils/mime";
 import { tryCompress } from "./compress.js";
 
 // --- Utilities ---
@@ -15,10 +15,14 @@ export async function writeAtomic(path, data) {
 
 const writeEmptyJson = (path) => writeAtomic(path, "[]");
 
+// Hono's table lacks text formats common in repositories.
+const yaml = "text/yaml; charset=utf-8";
+const mimes = { ...honoMimes, md: "text/markdown; charset=utf-8", yaml, yml: yaml };
+
 async function fileResponse(path, maxAge) {
   const [data, stat] = await Promise.all([readFile(path), fileStat(path)]);
   return new Response(data, { headers: {
-    "content-type": getMimeType(path) ?? "application/octet-stream",
+    "content-type": getMimeType(path, mimes) ?? "application/octet-stream",
     "etag": `W/"${stat.size}-${stat.mtime.getTime()}"`,
     "last-modified": stat.mtime.toUTCString(),
     "cache-control": maxAge === Infinity ? "public, max-age=31536000, immutable"
